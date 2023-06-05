@@ -13,6 +13,8 @@ import Lists from "./pages/lists/Lists.js";
 import ListSettings from "./pages/list_settings/ListSettings";
 import Layout from "./helpers/layout/Layout";
 import IGotThisList from "./pages/i_got_this_list/IGotThisList";
+import Groups from "./pages/groups/Groups";
+import AddGroup from "./pages/add_new_group/AddGroup";
 // -- End Pages --
 
 function App() {
@@ -132,6 +134,38 @@ function App() {
                                     <Layout />
                                 </>
                             )
+                        ) : (
+                            <Navigate to="/login" replace={true} />
+                        )
+                    }
+                />
+
+                {/* ---------- GROUPS ---------- */}
+
+                <Route
+                    path="/groups"
+                    element={
+                        currentUser ? (
+                            <>
+                                <Navbar />
+                                <Groups />
+                                <Footer />
+                            </>
+                        ) : (
+                            <Navigate to="/login" replace={true} />
+                        )
+                    }
+                />
+
+                <Route
+                    path="/groups/new"
+                    element={
+                        currentUser ? (
+                            <>
+                                <Navbar />
+                                <AddGroup />
+                                <Footer />
+                            </>
                         ) : (
                             <Navigate to="/login" replace={true} />
                         )
