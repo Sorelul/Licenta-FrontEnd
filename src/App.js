@@ -12,6 +12,7 @@ import Footer from "./helpers/footer/Footer.js";
 import Lists from "./pages/lists/Lists.js";
 import ListSettings from "./pages/list_settings/ListSettings";
 import Layout from "./helpers/layout/Layout";
+import IGotThisList from "./pages/i_got_this_list/IGotThisList";
 // -- End Pages --
 
 function App() {
@@ -74,6 +75,14 @@ function App() {
                 />
 
                 {/* ---------- LISTS ------- */}
+                <Route
+                    path="/list/i-got-this"
+                    element={
+                        <Layout>
+                            <IGotThisList />
+                        </Layout>
+                    }
+                />
                 <Route
                     path="/list/:id"
                     element={

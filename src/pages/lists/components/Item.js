@@ -22,13 +22,15 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 // Api
-import { updateItem, addItem, getItem, deleteItem } from "../../../api/itemsApi";
+import { updateItem, addItem, getItem, deleteItem, moveItem } from "../../../api/itemsApi";
+import { getOwnedList } from "../../../api/wishlistsApi";
 // CSS
 import "./Item.css";
 
 const Item = ({ item, currentList, index, isNew, setIsNewListOpen }) => {
     const MySwal = withReactContent(Swal);
     const { logout } = useContext(AuthContext);
+    const [ownedList, setOwnedList] = useState({});
 
     const navigate = useNavigate();
 
@@ -74,6 +76,7 @@ const Item = ({ item, currentList, index, isNew, setIsNewListOpen }) => {
     useEffect(() => {
         setItemState(item_state);
         setInitialItemState(item_state);
+        getOwnedListMethod();
     }, [item]);
 
     const getUpdatedItem = async () => {
@@ -220,6 +223,56 @@ const Item = ({ item, currentList, index, isNew, setIsNewListOpen }) => {
     // ! Handle New Item Cancel
     const handleCancel = () => {
         setIsNewListOpen(false);
+    };
+
+    const getOwnedListMethod = async () => {
+        var response = await getOwnedList();
+        if (response.error == false) {
+            setOwnedList(response.data[0]);
+        } else if (response.error == true) {
+            MySwal.fire({
+                title: <strong>{response.message}</strong>,
+                html: "",
+                icon: "error",
+            }).then(() => {
+                if (response.errorCode == 1) {
+                    logout();
+                }
+            });
+        }
+    };
+
+    const handleMove = async () => {
+        if (ownedList?.id_wishlist) {
+            var response = await moveItem(itemState.id_item, ownedList.id_wishlist);
+            if (response.error == false) {
+                MySwal.fire({
+                    title: <strong>{response.message}</strong>,
+                    html: "",
+                    icon: "success",
+                }).then(() => {
+                    navigate("/list/i-got-this");
+                });
+            } else if (response.error == true) {
+                MySwal.fire({
+                    title: <strong>{response.message}</strong>,
+                    html: "",
+                    icon: "error",
+                }).then(() => {
+                    if (response.errorCode == 1) {
+                        logout();
+                    }
+                });
+            }
+        } else {
+            MySwal.fire({
+                title: <strong>There is no "I got this" list!</strong>,
+                html: "",
+                icon: "error",
+            }).then(() => {
+                return;
+            });
+        }
     };
 
     return (
@@ -451,13 +504,19 @@ const Item = ({ item, currentList, index, isNew, setIsNewListOpen }) => {
                                                     <FontAwesomeIcon icon={faCopy} />
                                                     <span className="ml-2">Copy item</span>
                                                 </button>
-                                                <button
-                                                    title=" Delete and move itemState to I Got This list "
-                                                    className="focus:outline-none text-black bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:focus:ring-gray-900"
-                                                >
-                                                    <FontAwesomeIcon icon={faCheck} />
-                                                    <span className="ml-2">I got this</span>
-                                                </button>
+                                                {currentList?.wishlists_i_got_this == 0 ? (
+                                                    <button
+                                                        onClick={handleMove}
+                                                        title=" Delete and move itemState to I Got This list "
+                                                        className="focus:outline-none text-black bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:focus:ring-gray-900"
+                                                    >
+                                                        <FontAwesomeIcon icon={faCheck} />
+                                                        <span className="ml-2">I got this</span>
+                                                    </button>
+                                                ) : (
+                                                    <></>
+                                                )}
+
                                                 <p className="mt-8 italic font-medium text-center">
                                                     Added on{" "}
                                                     {new Date(item?.items_added).toLocaleDateString("en-US", {

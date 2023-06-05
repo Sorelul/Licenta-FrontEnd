@@ -27,6 +27,15 @@ export const updateItem = async (item) => {
     }
 };
 
+export const moveItem = async (id_item, id_wishlist) => {
+    try {
+        var results = await axios.put("/item/" + id_item + "/" + id_wishlist);
+        return results.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
 export const addItem = async (item, id_wishlist) => {
     try {
         Object.keys(item).forEach((attribute) => item[attribute] == "" && (item[attribute] = null));

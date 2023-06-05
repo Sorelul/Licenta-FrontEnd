@@ -9,6 +9,15 @@ export const getList = async (id_wishlist) => {
     }
 };
 
+export const getOwnedList = async () => {
+    try {
+        var results = await axios.get("/wishlist/owned");
+        return results.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
 export const updateList = async (list) => {
     try {
         var results = await axios.put("/wishlist/", list);
