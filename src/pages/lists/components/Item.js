@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 // Modal
 import DeleteConfirmationModal from "../../../helpers/modal/DeleteConfirmationModal";
 import AddImageModal from "../../../helpers/modal/AddImageModal";
+import CopyItemModal from "../../../helpers/modal/CopyItemModal";
 // react-router-dom
 import { useNavigate } from "react-router-dom";
 // Context
@@ -37,6 +38,7 @@ const Item = ({ item, currentList, index, isNew, setIsNewListOpen }) => {
     // ! Confirmation modal state & methods
     const [openModal, setOpenModal] = useState(false);
     const [openImageModal, setOpenImageModal] = useState(false);
+    const [openCopyItemModal, setOpenCopyItemModal] = useState(false);
 
     const handleDelete = () => {
         setOpenModal(true);
@@ -48,6 +50,10 @@ const Item = ({ item, currentList, index, isNew, setIsNewListOpen }) => {
 
     const handleImageClose = () => {
         setOpenImageModal(false);
+    };
+
+    const handleCopyItemClose = () => {
+        setOpenCopyItemModal(false);
     };
 
     // ! Accordion setup
@@ -457,6 +463,11 @@ const Item = ({ item, currentList, index, isNew, setIsNewListOpen }) => {
                                                 onClose={handleImageClose}
                                                 onAdd={handleImageAdd}
                                             />
+                                            <CopyItemModal
+                                                item={itemState}
+                                                open={openCopyItemModal}
+                                                onClose={handleCopyItemClose}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -465,18 +476,18 @@ const Item = ({ item, currentList, index, isNew, setIsNewListOpen }) => {
                                     <div className="flex flex-col justify-center md:w-40 xl:w-60 ">
                                         <div className="relative">
                                             {itemState.items_image ? (
-                                                <div class="img__wrap">
+                                                <div className="img__wrap">
                                                     <img
                                                         src={itemState.items_image}
                                                         className="object-cover rounded-md w-60 h-60 md:w-40 md:h-40 lg:w-60 lg:h-60 xl:w-60 xl:h-60"
                                                     />
                                                     <div
-                                                        class="img__description_layer"
+                                                        className="img__description_layer"
                                                         onClick={() => {
                                                             setOpenImageModal(true);
                                                         }}
                                                     >
-                                                        <p class="img__description">Click to Change Image</p>
+                                                        <p className="img__description">Click to Change Image</p>
                                                     </div>
                                                 </div>
                                             ) : (
@@ -498,6 +509,9 @@ const Item = ({ item, currentList, index, isNew, setIsNewListOpen }) => {
                                         ) : (
                                             <>
                                                 <button
+                                                    onClick={() => {
+                                                        setOpenCopyItemModal(true);
+                                                    }}
                                                     title="Copy itemState to another list"
                                                     className="focus:outline-none text-black bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 mt-4 mb-2 dark:focus:ring-gray-900"
                                                 >

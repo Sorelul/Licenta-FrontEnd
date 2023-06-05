@@ -7,7 +7,7 @@ import { AuthContext } from "../../context/authContext";
 
 const Sidebar = ({ children }) => {
     const navigate = useNavigate();
-    const { wishlists, getWishlists, setCurrentList } = useContext(AuthContext);
+    const { wishlists, getWishlists } = useContext(AuthContext);
     const [showSidebar, setShowSidebar] = useState(false);
 
     useEffect(() => {
@@ -63,7 +63,7 @@ const Sidebar = ({ children }) => {
                                     </a>
                                 </li>
                             ) : (
-                                <></>
+                                <div key={index}></div>
                             )
                         )}
 
