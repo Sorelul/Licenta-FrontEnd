@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 // Images
 import AddGroupImg from "../../assets/add_group.svg";
 // SweetAlert
@@ -7,11 +8,30 @@ import withReactContent from "sweetalert2-react-content";
 // Context
 import { AuthContext } from "../../context/authContext";
 import Tooltip from "@mui/material/Tooltip";
+// Api
+import { addGroup, inviteToGroup } from "../../api/groupsApi";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const AddGroup = () => {
+    const navigate = useNavigate();
     const MySwal = withReactContent(Swal);
     const [groupName, setGroupName] = useState("");
+    const [groupDescription, setGroupDescription] = useState("");
+    const { logout } = useContext(AuthContext);
+    const [group, setGroup] = useState({
+        groups_name: "",
+        groups_description: "",
+    });
     const { currentUser } = useContext(AuthContext);
+
+    // ! Update groups attributes
+    useEffect(() => {
+        setGroup({
+            groups_name: groupName,
+            groups_description: groupDescription,
+        });
+    }, [groupName, groupDescription]);
 
     // ! Inputs Handlers
     const [inputPairs, setInputPairs] = useState([
@@ -34,7 +54,7 @@ const AddGroup = () => {
     // ! End Inputs Handler
 
     // ! Handle Submit
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         //? Validate group name length.
@@ -54,12 +74,96 @@ const AddGroup = () => {
         );
 
         if (!hasIncompletePair) {
-            //? First we create an empty group with the given name.
+            const completedPairs = inputPairs.filter((pair) => pair.name && pair.email);
+            //? Check if the emails are valid
+            const isValidEmails = completedPairs.every((pair) => emailRegex.test(pair.email));
+            if (isValidEmails) {
+                //? If everything is okey, we create an empty group with the given name.
+                const id_group = await createGroup();
+                //? After the group has been created, we have to invite the users/future users.
+                if (id_group != null) {
+                    if (completedPairs.length > 1) {
+                        const invitation_status = await inviteUsers(completedPairs, id_group, groupName);
+                        if (invitation_status == false) {
+                            return;
+                        }
+                    }
+                    MySwal.fire({
+                        title: <strong>Group created succesfuly!</strong>,
+                        html: "",
+                        icon: "error",
+                    }).then(() => {
+                        navigate("/groups/" + id_group);
+                    });
+                } else {
+                    return;
+                }
+            } else {
+                MySwal.fire({
+                    title: <strong>The Emails must have an valid format!</strong>,
+                    html: <i>Ex: example@mail.com</i>,
+                    icon: "error",
+                });
+                return;
+            }
         } else {
             MySwal.fire({
                 title: <strong>Incomplete form</strong>,
                 html: <i>Please enter all fields</i>,
                 icon: "error",
+            });
+            return;
+        }
+    };
+
+    //! Create Group
+    const createGroup = async () => {
+        const response = await addGroup(group);
+        if (response?.error == false) {
+            if (response?.id_group) {
+                return response.id_group;
+            } else {
+                MySwal.fire({
+                    title: <strong>No group returned</strong>,
+                    html: "",
+                    icon: "error",
+                }).then(() => {
+                    return null;
+                });
+            }
+        } else {
+            MySwal.fire({
+                title: <strong>{response?.message}</strong>,
+                html: "",
+                icon: "error",
+            }).then(() => {
+                if (response?.errorCode == 1) {
+                    logout();
+                }
+            });
+        }
+    };
+
+    //! Invite Users
+    const inviteUsers = async (completedPairs, id_group, groupName) => {
+        const response = await inviteToGroup(completedPairs, id_group, groupName);
+        if (response?.error == false) {
+            return true;
+        } else {
+            var error_text = "";
+            response.errors.forEach((error) => {
+                error_text += error.err + "<br/>";
+            });
+
+            MySwal.fire({
+                title: <strong>{response?.message}</strong>,
+                html: { error_text },
+                icon: "error",
+            }).then(() => {
+                if (response?.errorCode == 1) {
+                    logout();
+                }
+                return false;
             });
         }
     };
@@ -84,7 +188,7 @@ const AddGroup = () => {
                     <section className="relative w-full p-5 bg-white md:rounded-b-md md:px-7 md:py-7 shadow-xl border-black">
                         <form method="post" className="flex flex-col items-center w-full">
                             <div className="flex flex-col items-center w-full mb-8">
-                                <label for="id_title" className="mb-1 text-xl font-headline md:mb-7">
+                                <label htmlFor="id_title" className="mb-1 text-xl font-headline md:mb-7">
                                     Name your group
                                 </label>
                                 <input
@@ -92,21 +196,36 @@ const AddGroup = () => {
                                     onChange={(e) => setGroupName(e.target.value)}
                                     type="text"
                                     name="groupName"
-                                    maxlength="100"
+                                    maxLength="100"
                                     placeholder="Visible to your group (eg. Smith Family)"
                                     required="required"
                                     className="font-medium md:w-1/2 form-input"
                                 />
                             </div>
+                            <div className="flex flex-col items-center w-full mb-8">
+                                <label htmlFor="id_title" className="mb-1 text-xl font-headline md:mb-7">
+                                    Description of your group (<span style={{ color: "gray" }}> optional </span> )
+                                </label>
+                                <input
+                                    value={groupDescription}
+                                    onChange={(e) => setGroupDescription(e.target.value)}
+                                    type="text"
+                                    name="groupDescription"
+                                    maxLength="200"
+                                    placeholder="A short description of your group (eg. Smith's Secret Party)"
+                                    required="required"
+                                    className="font-medium md:w-1/2 form-input"
+                                />
+                            </div>
                             <label
-                                for="id_invites"
+                                htmlFor="id_invites"
                                 id="invite_label"
                                 className="flex items-center mb-1 ml-5 text-xl font-headline md:mb-6"
                             >
                                 <span>Invite members</span>
                                 <span>
                                     <Tooltip title="Additional rows appear as needed." placement="right">
-                                        <a title="help for this function">
+                                        <a>
                                             <svg
                                                 viewBox="0 0 18 18"
                                                 alt="Help Button"
@@ -169,6 +288,7 @@ const AddGroup = () => {
                             <div className="flex mt-5 md:mt-10">
                                 <button
                                     type="button"
+                                    onClick={handleSubmit}
                                     className="w-full md:w-40 focus:outline-none text-black bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900"
                                 >
                                     <span className=" text-white">Save group &amp; invite</span>
