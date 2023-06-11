@@ -9,6 +9,15 @@ export const getGroup = async (id_group) => {
     }
 };
 
+export const getGroups = async () => {
+    try {
+        var results = await axios.get("/group/all");
+        return results.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
 export const updateGroup = async (group) => {
     try {
         var results = await axios.put("/group/", group);

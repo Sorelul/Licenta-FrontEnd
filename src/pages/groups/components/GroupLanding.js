@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
+import { AuthContext } from "../../../context/authContext";
 import GroupImg from "../../../assets/group2.svg";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { faMagnifyingGlass, faEye } from "@fortawesome/free-solid-svg-icons";
 
 const GroupLanding = () => {
     const navigate = useNavigate();
+    const { groups, groupsVisibility, setGroupsVisibility } = useContext(AuthContext);
     return (
         <>
             <section className="flex flex-col ">
@@ -54,13 +56,25 @@ const GroupLanding = () => {
                                 Join a group
                                 <FontAwesomeIcon className="w-5 h-5 ml-2 -mr-1" icon={faMagnifyingGlass} />
                             </a>
+                            {groups ? (
+                                <a
+                                    href=""
+                                    className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900 hover:bg-white hover:text-black"
+                                    onClick={() => setGroupsVisibility(!groupsVisibility)}
+                                >
+                                    See available groups
+                                    <FontAwesomeIcon className="w-5 h-5 ml-2 -mr-1" icon={faEye} />
+                                </a>
+                            ) : (
+                                <></>
+                            )}
                         </span>
                     </div>
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
                     <path
                         fill="#ca8a04"
-                        fill-opacity="1"
+                        fillOpacity="1"
                         d="M0,96L60,117.3C120,139,240,181,360,176C480,171,600,117,720,106.7C840,96,960,128,1080,128C1200,128,1320,96,1380,80L1440,64L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"
                     ></path>
                 </svg>

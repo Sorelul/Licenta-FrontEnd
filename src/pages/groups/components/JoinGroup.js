@@ -7,7 +7,6 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 // Context
 import { AuthContext } from "../../../context/authContext";
-import Tooltip from "@mui/material/Tooltip";
 // Api
 import { addUserToGroup } from "../../../api/groupsApi";
 // Fa Icons
@@ -18,7 +17,6 @@ const JoinGroup = () => {
     const navigate = useNavigate();
     const MySwal = withReactContent(Swal);
     const { logout } = useContext(AuthContext);
-    const { currentUser } = useContext(AuthContext);
     const [code, setCode] = useState("");
 
     // ! Handle Submit

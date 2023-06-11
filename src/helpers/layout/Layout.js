@@ -5,13 +5,13 @@ import Footer from "../footer/Footer";
 import Sidebar from "../sidebar/Sidebar";
 
 const Layout = ({ children }) => {
-  return (
-    <>
-      <Navbar />
-      <Sidebar children={children} />
-      <Footer />
-    </>
-  );
+    return (
+        <>
+            <Navbar />
+            <Sidebar display="lists" children={children} />
+            <Footer />
+        </>
+    );
 };
 
 export default Layout;
