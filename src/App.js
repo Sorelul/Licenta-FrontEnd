@@ -15,6 +15,7 @@ import Layout from "./helpers/layout/Layout";
 import IGotThisList from "./pages/i_got_this_list/IGotThisList";
 import Groups from "./pages/groups/Groups";
 import AddGroup from "./pages/groups/components/AddGroup";
+import JoinGroup from "./pages/groups/components/JoinGroup";
 // -- End Pages --
 
 function App() {
@@ -164,6 +165,21 @@ function App() {
                             <>
                                 <Navbar />
                                 <AddGroup />
+                                <Footer />
+                            </>
+                        ) : (
+                            <Navigate to="/login" replace={true} />
+                        )
+                    }
+                />
+
+                <Route
+                    path="/groups/join"
+                    element={
+                        currentUser ? (
+                            <>
+                                <Navbar />
+                                <JoinGroup />
                                 <Footer />
                             </>
                         ) : (

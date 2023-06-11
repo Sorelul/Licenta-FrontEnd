@@ -45,3 +45,12 @@ export const inviteToGroup = async (members, id_group, groupName) => {
         console.log(error);
     }
 };
+
+export const addUserToGroup = async (code) => {
+    try {
+        var results = await axios.post("/group/join", { code });
+        return results.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
