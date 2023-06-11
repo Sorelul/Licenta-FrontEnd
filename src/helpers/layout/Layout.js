@@ -4,11 +4,11 @@ import Navbar from "../navbar/Navbar";
 import Footer from "../footer/Footer";
 import Sidebar from "../sidebar/Sidebar";
 
-const Layout = ({ children }) => {
+const Layout = ({ children, display }) => {
     return (
         <>
             <Navbar />
-            <Sidebar display="lists" children={children} />
+            <Sidebar display={display} children={children} />
             <Footer />
         </>
     );

@@ -10,9 +10,6 @@ export const AuthContextProvider = ({ children }) => {
     const MySwal = withReactContent(Swal);
     const [wishlists, setWishlists] = useState([]);
     const [groups, setGroups] = useState([]);
-    const [groupsVisibility, setGroupsVisibility] = useState(
-        JSON.parse(localStorage.getItem("groupsVisibility")) || false
-    );
 
     const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
 
@@ -58,10 +55,6 @@ export const AuthContextProvider = ({ children }) => {
         getGroupsInfo();
     }, [currentUser]);
 
-    useEffect(() => {
-        localStorage.setItem("groupsVisibility", JSON.stringify(groupsVisibility));
-    }, [groupsVisibility]);
-
     return (
         <AuthContext.Provider
             value={{
@@ -71,8 +64,6 @@ export const AuthContextProvider = ({ children }) => {
                 getWishlists,
                 wishlists,
                 groups,
-                groupsVisibility,
-                setGroupsVisibility,
             }}
         >
             {children}

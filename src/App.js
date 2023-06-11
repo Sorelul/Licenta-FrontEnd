@@ -16,6 +16,7 @@ import IGotThisList from "./pages/i_got_this_list/IGotThisList";
 import Groups from "./pages/groups/Groups";
 import AddGroup from "./pages/groups/components/AddGroup";
 import JoinGroup from "./pages/groups/components/JoinGroup";
+import GroupsList from "./pages/groups/components/GroupsList";
 // -- End Pages --
 
 function App() {
@@ -81,7 +82,7 @@ function App() {
                 <Route
                     path="/list/i-got-this"
                     element={
-                        <Layout>
+                        <Layout display="lists">
                             <IGotThisList />
                         </Layout>
                     }
@@ -94,7 +95,7 @@ function App() {
                                 <Navigate to="/" replace={true} />
                             ) : (
                                 <>
-                                    <Layout>
+                                    <Layout display="lists">
                                         <Lists />
                                     </Layout>
                                 </>
@@ -113,7 +114,7 @@ function App() {
                                 <Navigate to="/" replace={true} />
                             ) : (
                                 <>
-                                    <Layout>
+                                    <Layout display="lists">
                                         <ListSettings />
                                     </Layout>
                                 </>
@@ -132,7 +133,7 @@ function App() {
                                 <Navigate to="/" replace={true} />
                             ) : (
                                 <>
-                                    <Layout />
+                                    <Layout display="lists" />
                                 </>
                             )
                         ) : (
@@ -181,6 +182,21 @@ function App() {
                                 <Navbar />
                                 <JoinGroup />
                                 <Footer />
+                            </>
+                        ) : (
+                            <Navigate to="/login" replace={true} />
+                        )
+                    }
+                />
+
+                <Route
+                    path="/groups/:id"
+                    element={
+                        currentUser ? (
+                            <>
+                                <Layout display="groups">
+                                    <GroupsList />
+                                </Layout>
                             </>
                         ) : (
                             <Navigate to="/login" replace={true} />
