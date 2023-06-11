@@ -1,6 +1,8 @@
 import React from "react";
 import GroupImg from "../../../assets/group2.svg";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 const GroupLanding = () => {
     const navigate = useNavigate();
@@ -41,6 +43,16 @@ const GroupLanding = () => {
                                         clipRule="evenodd"
                                     ></path>
                                 </svg>
+                            </a>
+                            <a
+                                href=""
+                                className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900 hover:bg-white hover:text-black"
+                                onClick={() => {
+                                    navigate("/groups/join");
+                                }}
+                            >
+                                Join a group
+                                <FontAwesomeIcon className="w-5 h-5 ml-2 -mr-1" icon={faMagnifyingGlass} />
                             </a>
                         </span>
                     </div>

@@ -1,15 +1,15 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // Images
-import AddGroupImg from "../../assets/add_group.svg";
+import AddGroupImg from "../../../assets/add_group.svg";
 // SweetAlert
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 // Context
-import { AuthContext } from "../../context/authContext";
+import { AuthContext } from "../../../context/authContext";
 import Tooltip from "@mui/material/Tooltip";
 // Api
-import { addGroup, inviteToGroup } from "../../api/groupsApi";
+import { addGroup, inviteToGroup } from "../../../api/groupsApi";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

@@ -14,7 +14,7 @@ import ListSettings from "./pages/list_settings/ListSettings";
 import Layout from "./helpers/layout/Layout";
 import IGotThisList from "./pages/i_got_this_list/IGotThisList";
 import Groups from "./pages/groups/Groups";
-import AddGroup from "./pages/add_new_group/AddGroup";
+import AddGroup from "./pages/groups/components/AddGroup";
 // -- End Pages --
 
 function App() {
