@@ -82,7 +82,7 @@ const AddGroup = () => {
                 const id_group = await createGroup();
                 //? After the group has been created, we have to invite the users/future users.
                 if (id_group != null) {
-                    if (completedPairs.length > 1) {
+                    if (completedPairs.length >= 1) {
                         const invitation_status = await inviteUsers(completedPairs, id_group, groupName);
                         if (invitation_status == false) {
                             return;
@@ -91,7 +91,7 @@ const AddGroup = () => {
                     MySwal.fire({
                         title: <strong>Group created succesfuly!</strong>,
                         html: "",
-                        icon: "error",
+                        icon: "success",
                     }).then(() => {
                         navigate("/groups/" + id_group);
                     });
