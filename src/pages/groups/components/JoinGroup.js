@@ -41,7 +41,7 @@ const JoinGroup = () => {
     const checkCode = async (code) => {
         const response = await addUserToGroup(code);
         if (response?.error == false) {
-            navigate("groups/" + response?.id_group);
+            navigate("/groups/" + response?.id_group);
         } else {
             MySwal.fire({
                 title: <strong>{response?.message}</strong>,

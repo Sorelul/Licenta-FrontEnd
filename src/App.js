@@ -17,6 +17,7 @@ import Groups from "./pages/groups/Groups";
 import AddGroup from "./pages/groups/components/AddGroup";
 import JoinGroup from "./pages/groups/components/JoinGroup";
 import GroupsList from "./pages/groups/components/GroupsList";
+import Error404 from "./helpers/404/Error404";
 // -- End Pages --
 
 function App() {
@@ -204,9 +205,15 @@ function App() {
                     }
                 />
 
+                <Route path="/not-found" element={<Error404 />} />
+
                 {/* ---------- LOGIN & REGISTER ---------- */}
                 <Route path="/login" element={currentUser ? <Navigate to="/" replace={true} /> : <Login />} />
                 <Route path="/register" element={currentUser ? <Navigate to="/" replace={true} /> : <Register />} />
+
+                {/*  Page Not Found */}
+
+                <Route path="*" element={<Error404 />} />
             </Routes>
         </Router>
     );
