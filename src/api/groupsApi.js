@@ -63,3 +63,21 @@ export const addUserToGroup = async (code) => {
         console.log(error);
     }
 };
+
+export const removeUserFromGroup = async (id_group, id_user) => {
+    try {
+        var results = await axios.delete("/group/removeMember", { data: { id_group, id_user } });
+        return results.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const getGroupMembers = async (id_group) => {
+    try {
+        var results = await axios.get("/group/members/" + id_group);
+        return results.data;
+    } catch (error) {
+        console.log(error);
+    }
+};

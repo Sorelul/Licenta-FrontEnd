@@ -64,6 +64,7 @@ export const AuthContextProvider = ({ children }) => {
                 getWishlists,
                 wishlists,
                 groups,
+                getGroupsInfo,
             }}
         >
             {children}

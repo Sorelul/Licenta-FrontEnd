@@ -18,7 +18,7 @@ const AddGroup = () => {
     const MySwal = withReactContent(Swal);
     const [groupName, setGroupName] = useState("");
     const [groupDescription, setGroupDescription] = useState("");
-    const { logout } = useContext(AuthContext);
+    const { logout, getGroupsInfo } = useContext(AuthContext);
     const [group, setGroup] = useState({
         groups_name: "",
         groups_description: "",
@@ -92,7 +92,8 @@ const AddGroup = () => {
                         title: <strong>Group created succesfuly!</strong>,
                         html: "",
                         icon: "success",
-                    }).then(() => {
+                    }).then(async () => {
+                        await getGroupsInfo();
                         navigate("/groups/" + id_group);
                     });
                 } else {

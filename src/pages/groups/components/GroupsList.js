@@ -1,30 +1,204 @@
-// React
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-// Context
-import { AuthContext } from "../../../context/authContext";
 // Sweet Alert
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-// Icons
+// Icons + img
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear, faPlus } from "@fortawesome/free-solid-svg-icons";
-// Helpers
+import { faGear, faPlus, faEllipsis } from "@fortawesome/free-solid-svg-icons";
+import NoAvatar from "../../../assets/noAvatar.jpg";
+// Context
+import { AuthContext } from "../../../context/authContext";
+// Api
+import { getGroupMembers, getGroup, removeUserFromGroup } from "../../../api/groupsApi";
+// Components
+import ContextMenu from "../../../helpers/menu_context/ContextMenu";
 
 const GroupsList = () => {
     const MySwal = withReactContent(Swal);
     const navigate = useNavigate();
-    const { groups } = useContext(AuthContext);
-    const [currentGroup, setCurrentGroup] = useState({});
     const params = useParams();
+    const { logout, currentUser } = useContext(AuthContext);
     const [show, setShow] = useState(1);
+    const [members, setMembers] = useState([]);
+    const [currentGroup, setCurrentGroup] = useState({});
+
+    //? Admin
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    //? Context Menu
+    const buttonRef = useRef(null);
+    const [showContextMenu, setShowContextMenu] = useState(false);
+    const handleContextMenu = (event) => {
+        event.preventDefault();
+        setShowContextMenu(true);
+    };
+    const handleCloseContextMenu = () => {
+        setShowContextMenu(false);
+    };
+    useEffect(() => {
+        const handleOutsideClick = () => {
+            handleCloseContextMenu();
+        };
+
+        if (showContextMenu) {
+            window.addEventListener("click", handleOutsideClick);
+        }
+
+        return () => {
+            window.removeEventListener("click", handleOutsideClick);
+        };
+    }, [showContextMenu]);
+    //? End context menu
+
+    const getCurrentGroup = async (id_group) => {
+        const response = await getGroup(id_group);
+        if (response?.error == false) {
+            if (response) {
+                setCurrentGroup(response.data[0]);
+            } else {
+                MySwal.fire({
+                    title: <strong>No group returned</strong>,
+                    html: "",
+                    icon: "error",
+                }).then(() => {
+                    return null;
+                });
+            }
+        } else {
+            MySwal.fire({
+                title: <strong>{response?.message}</strong>,
+                html: "",
+                icon: "error",
+            }).then(() => {
+                if (response?.errorCode == 1) {
+                    logout();
+                }
+            });
+        }
+    };
+
+    const getMembers = async (id_group) => {
+        const response = await getGroupMembers(id_group);
+        if (response?.error == false) {
+            if (response) {
+                setMembers(response.data);
+            } else {
+                MySwal.fire({
+                    title: <strong>No member returned</strong>,
+                    html: "",
+                    icon: "error",
+                }).then(() => {
+                    return null;
+                });
+            }
+        } else {
+            MySwal.fire({
+                title: <strong>{response?.message}</strong>,
+                html: "",
+                icon: "error",
+            }).then(() => {
+                if (response?.errorCode == 1) {
+                    logout();
+                }
+            });
+        }
+    };
+
+    const removeMember = async (id_user) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Perform the deletion
+                removeMemberAction(id_user);
+            }
+        });
+    };
+
+    const removeMemberAction = async (id_user) => {
+        const response = await removeUserFromGroup(currentGroup.id_group, id_user);
+        if (response?.error == false) {
+            if (response) {
+                getMembers(currentGroup.id_group);
+            } else {
+                MySwal.fire({
+                    title: <strong>No member returned</strong>,
+                    html: "",
+                    icon: "error",
+                }).then(() => {
+                    return null;
+                });
+            }
+        } else {
+            MySwal.fire({
+                title: <strong>{response?.message}</strong>,
+                html: "",
+                icon: "error",
+            }).then(() => {
+                if (response?.errorCode == 1) {
+                    logout();
+                }
+            });
+        }
+    };
+
+    const sendEmailToMember = async (id_member) => {
+        console.log(id_member);
+    };
+
+    const timeDiff = (dateString) => {
+        // Create a Date object from the date string
+        const date = new Date(dateString);
+
+        // Get the current date and time
+        const currentDate = new Date();
+
+        // Calculate the time difference in milliseconds
+        const timeDiff = currentDate - date;
+
+        // Convert the time difference to a human-readable format
+        const secondsDiff = Math.floor(timeDiff / 1000);
+        const minutesDiff = Math.floor(secondsDiff / 60);
+        const hoursDiff = Math.floor(minutesDiff / 60);
+        const daysDiff = Math.floor(hoursDiff / 24);
+        const monthsDiff = Math.floor(daysDiff / 30);
+        const yearsDiff = Math.floor(monthsDiff / 12);
+
+        let timeAgo;
+        if (yearsDiff > 0) {
+            timeAgo = `${yearsDiff} year${yearsDiff > 1 ? "s" : ""} ago`;
+        } else if (monthsDiff > 0) {
+            timeAgo = `${monthsDiff} month${monthsDiff > 1 ? "s" : ""} ago`;
+        } else if (daysDiff > 0) {
+            timeAgo = `${daysDiff} day${daysDiff > 1 ? "s" : ""} ago`;
+        } else if (hoursDiff > 0) {
+            timeAgo = `${hoursDiff} hour${hoursDiff > 1 ? "s" : ""} ago`;
+        } else if (minutesDiff > 0) {
+            timeAgo = `${minutesDiff} minute${minutesDiff > 1 ? "s" : ""} ago`;
+        } else {
+            timeAgo = `${secondsDiff} second${secondsDiff > 1 ? "s" : ""} ago`;
+        }
+
+        return timeAgo;
+    };
 
     useEffect(() => {
-        setCurrentGroup(groups.find((group) => group.id_group == params.id));
+        getCurrentGroup(params.id);
+        getMembers(params.id);
+        if (currentUser?.id_user == currentGroup?.groups_admin) {
+            setIsAdmin(true);
+        }
     }, [params]);
 
-    if (currentGroup) {
+    if (currentGroup !== null) {
         return (
             <div className="w-screen h-screen flex justify-center">
                 <div className="w-3/4 h-5/6 shadow-xl my-auto">
@@ -90,13 +264,86 @@ const GroupsList = () => {
                             </div>
                         </div>
 
-                        <div>{/* //? Members map */}</div>
+                        <div>
+                            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                                {members?.map((member, index) => (
+                                    <li key={index} className="py-3 sm:py-4">
+                                        <div className="flex justify-between space-x-4 w-full">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="flex-shrink-0 pl-10">
+                                                    <img
+                                                        className="w-16 h-16 rounded-full"
+                                                        src={
+                                                            member?.users_profile_image
+                                                                ? member.users_profile_image
+                                                                : NoAvatar
+                                                        }
+                                                        alt="User Image"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 min-w-0 lg:min-w-[250px] max-w-[400px]">
+                                                    <p className="text-lg font-medium text-gray-900 truncate ">
+                                                        {member?.users_username ? member.users_username : "Jon Doe"}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500 truncate dark:text-gray-500">
+                                                        {member?.users_email ? member.users_email : "Jon@Doe.com"}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="inline-flex items-center text-base font-light text-gray-600">
+                                                <p className="text-2xl">&#127874;</p>{" "}
+                                                {member?.users_date_of_birth
+                                                    ? new Date(member.users_date_of_birth).toLocaleDateString(
+                                                          undefined,
+                                                          { year: "numeric", month: "long", day: "numeric" }
+                                                      )
+                                                    : "Unknown"}
+                                            </div>
+                                            <div className="inline-flex  text-base font-light text-gray-900 items-center">
+                                                Last seen: {/* new Date(member.users_last_heartbeat) - new Date() */}
+                                                {member?.users_last_heartbeat
+                                                    ? timeDiff(member.users_last_heartbeat)
+                                                    : "Unknown"}
+                                            </div>
+                                            <div className="inline-flex  text-base font-light text-gray-900 items-center pr-20">
+                                                {isAdmin && currentGroup?.groups_admin != member.id_user ? (
+                                                    <>
+                                                        <button
+                                                            ref={buttonRef}
+                                                            type="button"
+                                                            onContextMenu={handleContextMenu}
+                                                            className="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2"
+                                                        >
+                                                            <FontAwesomeIcon icon={faEllipsis} />
+                                                        </button>
+                                                        {showContextMenu && (
+                                                            <ContextMenu
+                                                                buttonRef={buttonRef}
+                                                                onClose={handleCloseContextMenu}
+                                                                onRemoveClick={() => removeMember(member.id_user)}
+                                                                onSendEmailClick={() =>
+                                                                    sendEmailToMember(member.id_user)
+                                                                }
+                                                            />
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         );
     } else {
         navigate("/not-found");
+        return null;
     }
 };
 
