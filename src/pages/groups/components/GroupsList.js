@@ -11,9 +11,16 @@ import NoAvatar from "../../../assets/noAvatar.jpg";
 // Context
 import { AuthContext } from "../../../context/authContext";
 // Api
-import { getGroupMembers, getGroup, removeUserFromGroup } from "../../../api/groupsApi";
+import {
+    getGroupMembers,
+    getGroup,
+    removeUserFromGroup,
+    inviteToGroup,
+    sendEmailToGroupMembers,
+} from "../../../api/groupsApi";
 // Components
 import ContextMenu from "../../../helpers/menu_context/ContextMenu";
+import AddNewUserModal from "../../../helpers/modal/AddNewUserModal";
 
 const GroupsList = () => {
     const MySwal = withReactContent(Swal);
@@ -23,6 +30,104 @@ const GroupsList = () => {
     const [show, setShow] = useState(1);
     const [members, setMembers] = useState([]);
     const [currentGroup, setCurrentGroup] = useState({});
+
+    //? Email Group
+    const [emailSubject, setEmailSubject] = useState("");
+    const [emailBody, setEmailBody] = useState("");
+
+    const handleEmailGroupSend = async () => {
+        if (emailSubject && emailBody) {
+            // continue sending email
+            var response = await sendEmailToGroup();
+            if (response) {
+                MySwal.fire({
+                    title: <strong>The email has been send.</strong>,
+                    html: "Your email has been sent to the group members",
+                    icon: "success",
+                });
+            }
+        } else {
+            MySwal.fire({
+                title: <strong>Email subject or body is empty!</strong>,
+                html: "<strong>Email subject or body is empty!</strong><br/> Please complete all required fields",
+                icon: "error",
+            });
+        }
+    };
+
+    const sendEmailToGroup = async () => {
+        const response = await sendEmailToGroupMembers(
+            { emailSubject, emailBody },
+            currentGroup.id_group,
+            currentGroup.groups_name
+        );
+        if (response?.error == false) {
+            return true;
+        } else {
+            var error_text = "";
+            response.errors.forEach((error) => {
+                error_text += error.err + "<br/>";
+            });
+
+            MySwal.fire({
+                title: <strong>{response?.message}</strong>,
+                html: { error_text },
+                icon: "error",
+            }).then(() => {
+                if (response?.errorCode == 1) {
+                    logout();
+                }
+                return false;
+            });
+        }
+    };
+
+    //? Modal
+    const [openModal, setOpenModal] = useState(false);
+
+    const handleMemberAdd = async (pair) => {
+        if (pair.email && pair.name) {
+            var response = await inviteUsers([pair], currentGroup.id_group, currentGroup.groups_name);
+            if (response) {
+                setOpenModal(false);
+                MySwal.fire({
+                    title: <strong>The invitation has been send.</strong>,
+                    html: "An invitation code was sent to your friends email.",
+                    icon: "success",
+                });
+            }
+        } else {
+            setOpenModal(false);
+            MySwal.fire({
+                title: <strong>Email or Name is empty!</strong>,
+                html: "<strong>Email or Name is empty!</strong><br/> Please complete all required fields",
+                icon: "error",
+            });
+        }
+    };
+
+    const inviteUsers = async (completedPairs, id_group, groupName) => {
+        const response = await inviteToGroup(completedPairs, id_group, groupName);
+        if (response?.error == false) {
+            return true;
+        } else {
+            var error_text = "";
+            response.errors.forEach((error) => {
+                error_text += error.err + "<br/>";
+            });
+
+            MySwal.fire({
+                title: <strong>{response?.message}</strong>,
+                html: { error_text },
+                icon: "error",
+            }).then(() => {
+                if (response?.errorCode == 1) {
+                    logout();
+                }
+                return false;
+            });
+        }
+    };
 
     //? Admin
     const [isAdmin, setIsAdmin] = useState(false);
@@ -205,22 +310,27 @@ const GroupsList = () => {
                     {/* HEADER */}
                     <div id="group-header" className="h-[20%] bg-gradient-to-r from-yellow-600 to-gray-800">
                         {/* //? Group Settings */}
-                        <div className="w-full h-[15%] flex justify-end items-end">
-                            <div
-                                className="w-[20%] h-full flex justify-center items-center rounded-bl-lg rounded-br-lg mr-5"
-                                style={{ backgroundColor: "rgba(244,244,244,0.3)" }}
-                            >
-                                <span
-                                    className="flex my-auto hover:text-white cursor-pointer"
-                                    onClick={() => {
-                                        navigate("/groups/edit/" + currentGroup.id_group);
-                                    }}
+                        {isAdmin ? (
+                            <div className="w-full h-[15%] flex justify-end items-end">
+                                <div
+                                    className="w-[20%] h-full flex justify-center items-center rounded-bl-lg rounded-br-lg mr-5"
+                                    style={{ backgroundColor: "rgba(244,244,244,0.3)" }}
                                 >
-                                    <FontAwesomeIcon className="my-auto" icon={faGear} />{" "}
-                                    <p className="ml-2">Settings</p>
-                                </span>
+                                    <span
+                                        className="flex my-auto hover:text-white cursor-pointer"
+                                        onClick={() => {
+                                            navigate("/groups/edit/" + currentGroup.id_group);
+                                        }}
+                                    >
+                                        <FontAwesomeIcon className="my-auto" icon={faGear} />{" "}
+                                        <p className="ml-2">Settings</p>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <></>
+                        )}
+
                         <div className="w-full h-[85%] flex justify-start items-center">
                             <h1 className="text-4xl font-bold pl-10">{currentGroup?.groups_name}</h1>
                             <div className="flex mr-20 text-white" style={{ marginLeft: "auto" }}>
@@ -255,88 +365,141 @@ const GroupsList = () => {
                                 <span className="ml-5 text-gray-100">
                                     <button
                                         type="button"
+                                        onClick={() => setOpenModal(!openModal)}
                                         className="text-gray-100 mr-10 mb-2 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-lg px-5 py-2.5 text-center dark:border-gray-600 dark:text-gray-100 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
                                     >
                                         <FontAwesomeIcon className="my-auto mr-3" icon={faPlus} />
                                         Invite more members
                                     </button>
+                                    <AddNewUserModal
+                                        open={openModal}
+                                        onClose={() => setOpenModal(!openModal)}
+                                        onAdd={handleMemberAdd}
+                                    />
                                 </span>
                             </div>
                         </div>
 
-                        <div>
-                            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                                {members?.map((member, index) => (
-                                    <li key={index} className="py-3 sm:py-4">
-                                        <div className="flex justify-between space-x-4 w-full">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="flex-shrink-0 pl-10">
-                                                    <img
-                                                        className="w-16 h-16 rounded-full"
-                                                        src={
-                                                            member?.users_profile_image
-                                                                ? member.users_profile_image
-                                                                : NoAvatar
-                                                        }
-                                                        alt="User Image"
-                                                    />
+                        {show == 1 ? (
+                            <div>
+                                <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                                    {members?.map((member, index) => (
+                                        <li key={index} className="py-3 sm:py-4">
+                                            <div className="flex justify-between space-x-4 w-full">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="flex-shrink-0 pl-10">
+                                                        <img
+                                                            className="w-16 h-16 rounded-full"
+                                                            src={
+                                                                member?.users_profile_image
+                                                                    ? member.users_profile_image
+                                                                    : NoAvatar
+                                                            }
+                                                            alt="User Image"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0 lg:min-w-[250px] max-w-[400px]">
+                                                        <p className="text-lg font-medium text-gray-900 truncate ">
+                                                            {member?.users_username ? member.users_username : "Jon Doe"}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500 truncate dark:text-gray-500">
+                                                            {member?.users_email ? member.users_email : "Jon@Doe.com"}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="flex-1 min-w-0 lg:min-w-[250px] max-w-[400px]">
-                                                    <p className="text-lg font-medium text-gray-900 truncate ">
-                                                        {member?.users_username ? member.users_username : "Jon Doe"}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500 truncate dark:text-gray-500">
-                                                        {member?.users_email ? member.users_email : "Jon@Doe.com"}
-                                                    </p>
-                                                </div>
-                                            </div>
 
-                                            <div className="inline-flex items-center text-base font-light text-gray-600">
-                                                <p className="text-2xl">&#127874;</p>{" "}
-                                                {member?.users_date_of_birth
-                                                    ? new Date(member.users_date_of_birth).toLocaleDateString(
-                                                          undefined,
-                                                          { year: "numeric", month: "long", day: "numeric" }
-                                                      )
-                                                    : "Unknown"}
+                                                <div className="inline-flex items-center text-base font-light text-gray-600">
+                                                    <p className="text-2xl">&#127874;</p>{" "}
+                                                    {member?.users_date_of_birth
+                                                        ? new Date(member.users_date_of_birth).toLocaleDateString(
+                                                              undefined,
+                                                              { year: "numeric", month: "long", day: "numeric" }
+                                                          )
+                                                        : "Unknown"}
+                                                </div>
+                                                <div className="inline-flex  text-base font-light text-gray-900 items-center">
+                                                    Last seen:{" "}
+                                                    {/* new Date(member.users_last_heartbeat) - new Date() */}
+                                                    {member?.users_last_heartbeat
+                                                        ? timeDiff(member.users_last_heartbeat)
+                                                        : "Unknown"}
+                                                </div>
+                                                <div className="inline-flex  text-base font-light text-gray-900 items-center pr-20">
+                                                    {isAdmin && currentGroup?.groups_admin != member.id_user ? (
+                                                        <>
+                                                            <button
+                                                                ref={buttonRef}
+                                                                type="button"
+                                                                onContextMenu={handleContextMenu}
+                                                                className="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2"
+                                                            >
+                                                                <FontAwesomeIcon icon={faEllipsis} />
+                                                            </button>
+                                                            {showContextMenu && (
+                                                                <ContextMenu
+                                                                    buttonRef={buttonRef}
+                                                                    onClose={handleCloseContextMenu}
+                                                                    onRemoveClick={() => removeMember(member.id_user)}
+                                                                    onSendEmailClick={() =>
+                                                                        sendEmailToMember(member.id_user)
+                                                                    }
+                                                                />
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="inline-flex  text-base font-light text-gray-900 items-center">
-                                                Last seen: {/* new Date(member.users_last_heartbeat) - new Date() */}
-                                                {member?.users_last_heartbeat
-                                                    ? timeDiff(member.users_last_heartbeat)
-                                                    : "Unknown"}
-                                            </div>
-                                            <div className="inline-flex  text-base font-light text-gray-900 items-center pr-20">
-                                                {isAdmin && currentGroup?.groups_admin != member.id_user ? (
-                                                    <>
-                                                        <button
-                                                            ref={buttonRef}
-                                                            type="button"
-                                                            onContextMenu={handleContextMenu}
-                                                            className="text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2"
-                                                        >
-                                                            <FontAwesomeIcon icon={faEllipsis} />
-                                                        </button>
-                                                        {showContextMenu && (
-                                                            <ContextMenu
-                                                                buttonRef={buttonRef}
-                                                                onClose={handleCloseContextMenu}
-                                                                onRemoveClick={() => removeMember(member.id_user)}
-                                                                onSendEmailClick={() =>
-                                                                    sendEmailToMember(member.id_user)
-                                                                }
-                                                            />
-                                                        )}
-                                                    </>
-                                                ) : (
-                                                    <></>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ) : show == 2 ? (
+                            <div className="p-10">
+                                <form>
+                                    <div className="mb-4">
+                                        <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
+                                            Subject
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="subject"
+                                            name="subject"
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            value={emailSubject}
+                                            onChange={(e) => setEmailSubject(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-4">
+                                        <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                                            Message
+                                        </label>
+                                        <textarea
+                                            id="message"
+                                            name="message"
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            rows="8"
+                                            value={emailBody}
+                                            onChange={(e) => setEmailBody(e.target.value)}
+                                            required
+                                        ></textarea>
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={handleEmailGroupSend}
+                                            className="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                                        >
+                                            Send Email
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        ) : (
+                            <></>
+                        )}
                     </div>
                 </div>
             </div>
