@@ -45,6 +45,8 @@ const GroupsList = () => {
                     html: "Your email has been sent to the group members",
                     icon: "success",
                 });
+                setEmailSubject("");
+                setEmailBody("");
             }
         } else {
             MySwal.fire({
