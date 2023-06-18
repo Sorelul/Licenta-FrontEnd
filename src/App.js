@@ -22,21 +22,10 @@ import Error404 from "./helpers/404/Error404";
 
 function App() {
     const { currentUser, getWishlists, wishlists } = useContext(AuthContext);
-    const [showHome, setShowHome] = useState(true);
 
     useEffect(() => {
         getWishlists();
     }, []);
-
-    useEffect(() => {}, [showHome]);
-
-    useEffect(() => {
-        if (wishlists.length > 0) {
-            setShowHome(false);
-        } else {
-            setShowHome(true);
-        }
-    }, [wishlists]);
 
     return (
         <Router>
@@ -46,15 +35,11 @@ function App() {
                     path="/"
                     element={
                         currentUser ? (
-                            showHome ? (
-                                <>
-                                    <Navbar />
-                                    <Home />
-                                    <Footer />
-                                </>
-                            ) : (
-                                <Navigate to="/list" replace={true} />
-                            )
+                            <>
+                                <Navbar />
+                                <Home />
+                                <Footer />
+                            </>
                         ) : (
                             <Navigate to="/login" replace={true} />
                         )
@@ -92,15 +77,11 @@ function App() {
                     path="/list/:id"
                     element={
                         currentUser ? (
-                            showHome ? (
-                                <Navigate to="/" replace={true} />
-                            ) : (
-                                <>
-                                    <Layout display="lists">
-                                        <Lists />
-                                    </Layout>
-                                </>
-                            )
+                            <>
+                                <Layout display="lists">
+                                    <Lists />
+                                </Layout>
+                            </>
                         ) : (
                             <Navigate to="/login" replace={true} />
                         )
@@ -111,15 +92,11 @@ function App() {
                     path="/list/edit/:id"
                     element={
                         currentUser ? (
-                            showHome ? (
-                                <Navigate to="/" replace={true} />
-                            ) : (
-                                <>
-                                    <Layout display="lists">
-                                        <ListSettings />
-                                    </Layout>
-                                </>
-                            )
+                            <>
+                                <Layout display="lists">
+                                    <ListSettings />
+                                </Layout>
+                            </>
                         ) : (
                             <Navigate to="/login" replace={true} />
                         )
@@ -130,13 +107,9 @@ function App() {
                     path="/list"
                     element={
                         currentUser ? (
-                            showHome ? (
-                                <Navigate to="/" replace={true} />
-                            ) : (
-                                <>
-                                    <Layout display="lists" />
-                                </>
-                            )
+                            <>
+                                <Layout display="lists" />
+                            </>
                         ) : (
                             <Navigate to="/login" replace={true} />
                         )
