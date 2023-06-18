@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faFloppyDisk, faXmark, faTrash, faLock, faUnlock } from "@fortawesome/free-solid-svg-icons";
 // API
 import { deleteList, getList, updateList } from "../../api/wishlistsApi";
+import { getGroupsForList } from "../../api/groupsApi";
 // Context
 import { AuthContext } from "../../context/authContext";
 // Sweet Alert
@@ -19,16 +20,20 @@ import DeleteConfirmationModal from "../../helpers/modal/DeleteConfirmationModal
 const ListSettings = () => {
     const params = useParams();
     const MySwal = withReactContent(Swal);
-    const { logout } = useContext(AuthContext);
-    const [currentList, setCurrentList] = useState({});
+    const { logout, getGroupsInfo, groups } = useContext(AuthContext);
     const [openModal, setOpenModal] = useState(false);
+    const [currentList, setCurrentList] = useState({});
     const [color, setColor] = useState("");
     const navigate = useNavigate();
+    const [checkedInputs, setCheckedInputs] = useState([]);
+    const [predefinedList, setPredefinedList] = useState([]);
 
     const getCurrentList = async (id_wishlist) => {
         var response = await getList(id_wishlist);
         if (response.error == false) {
-            setCurrentList(response.data[0]);
+            var localList = response.data[0];
+            localList.correlatedGroups = predefinedList;
+            setCurrentList(localList);
         } else if (response.error == true) {
             MySwal.fire({
                 title: <strong>{response.message}</strong>,
@@ -42,6 +47,40 @@ const ListSettings = () => {
         }
     };
 
+    const getCurrentGroupsForList = async (id_wishlist) => {
+        var response = await getGroupsForList(id_wishlist);
+        if (response.error == false) {
+            var newArray = response.data.map((obj) => obj.cgl_id_group);
+            setPredefinedList(newArray);
+        } else if (response.error == true) {
+            MySwal.fire({
+                title: <strong>{response.message}</strong>,
+                html: "",
+                icon: "error",
+            }).then(() => {
+                if (response.errorCode == 1) {
+                    logout();
+                }
+            });
+        }
+    };
+
+    // ! Checkboxes
+    const handleCheckboxChange = (event, key) => {
+        if (event.target.checked) {
+            setCheckedInputs((prevCheckedInputs) => [...prevCheckedInputs, key]);
+        } else {
+            setCheckedInputs((prevCheckedInputs) => prevCheckedInputs.filter((item) => item !== key));
+        }
+    };
+
+    useEffect(() => {
+        setCurrentList({
+            ...currentList,
+            ["correlatedGroups"]: checkedInputs,
+        });
+    }, [checkedInputs]);
+
     // ! Handle List Update
     const handleSave = async (e, list = null) => {
         e.preventDefault();
@@ -49,14 +88,14 @@ const ListSettings = () => {
         var response = await updateList(list ? list : currentList);
         if (response.error == false) {
             MySwal.fire({
-                title: <strong>{response.message}</strong>,
-                html: "",
+                title: <strong>Updated Successfully</strong>,
+                html: <i>{response.message}</i>,
                 icon: "success",
             });
         } else if (response.error == true) {
             MySwal.fire({
-                title: <strong>{response.message}</strong>,
-                html: "",
+                title: <strong>Error updating</strong>,
+                html: <i>{response.message}</i>,
                 icon: "error",
             }).then(() => {
                 if (response.errorCode == 1) {
@@ -97,6 +136,15 @@ const ListSettings = () => {
     useEffect(() => {
         getCurrentList(params.id);
     }, [params]);
+
+    useEffect(() => {
+        getGroupsInfo();
+        getCurrentGroupsForList(params.id);
+    }, []);
+
+    useEffect(() => {
+        setCheckedInputs(predefinedList);
+    }, [groups]);
 
     //! Change the color from currentList
     useEffect(() => {
@@ -155,8 +203,8 @@ const ListSettings = () => {
                                         name="wishlists_name"
                                         value={currentList.wishlists_name}
                                         onChange={handleChange}
-                                        maxlength="255"
-                                        autocomplete="off"
+                                        maxLength="255"
+                                        autoComplete="off"
                                         required="required"
                                         id="wishlists_name"
                                         className="h-10 mb-3 text-2xl text-black font-display form-input input-inset input-inset-teal"
@@ -202,6 +250,7 @@ const ListSettings = () => {
                                                         ...currentList,
                                                         ["wishlists_privacy"]: 1,
                                                     });
+                                                    setCheckedInputs([]);
                                                 }}
                                                 className="border-r border-tan-200 rounded-l-md focus:shadow-none bg-white"
                                                 style={{
@@ -278,23 +327,27 @@ const ListSettings = () => {
                                                 </p>
                                                 <div className="flex flex-col items-center mt-8">
                                                     <h2 className="mb-3 text-lg font-headline">Groups shared with</h2>{" "}
-                                                    <ul className="flex flex-col mt-1">
-                                                        <li className="flex items-center mb-2">
-                                                            <input
-                                                                type="checkbox"
-                                                                id="id_perms-group_0"
-                                                                name="perms-group"
-                                                                value="357395"
-                                                                checked="checked"
-                                                                className="w-6 h-6 text-red-600 border-red-500 form-checkbox hover:cursor-pointer focus:shadow-none"
-                                                            />{" "}
-                                                            <label
-                                                                for="id_perms-group_0"
-                                                                className="w-64 ml-3 text-sm font-medium text-left"
-                                                            >
-                                                                Grup de Test
-                                                            </label>
-                                                        </li>
+                                                    <ul className="flex flex-wrap items-center justify-center">
+                                                        {groups.map((group, key) => (
+                                                            <li key={key} className="flex items-center mb-2 w-1/4">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    id={`group-checkbox${key}`}
+                                                                    name={`group-checkbox${key}`}
+                                                                    className="w-6 h-6 text-red-600 border-red-500 form-checkbox hover:cursor-pointer focus:shadow-none"
+                                                                    onChange={(event) =>
+                                                                        handleCheckboxChange(event, group.id_group)
+                                                                    }
+                                                                    checked={checkedInputs.includes(group.id_group)}
+                                                                />{" "}
+                                                                <label
+                                                                    htmlFor={`group-checkbox${key}`}
+                                                                    className="w-64 ml-3 text-sm font-medium text-left"
+                                                                >
+                                                                    {group.groups_name}
+                                                                </label>
+                                                            </li>
+                                                        ))}
                                                     </ul>
                                                 </div>
                                             </div>

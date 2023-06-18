@@ -1,13 +1,94 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png";
+// Context
 import { AuthContext } from "../../context/authContext";
+// Icons + Images
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell } from "@fortawesome/free-solid-svg-icons";
 import noAvatar from "../../assets/noAvatar.jpg";
+import logo from "../../assets/logo.png";
+// Api
+import { getNotifications, setNotificationsSeen, deleteNotification } from "../../api/notificationsApi";
+// Sweet Alert
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+// Modal
+import NotificationsModal from "../modal/NotificationsModal";
 
 const Navbar = () => {
     const { currentUser, logout } = useContext(AuthContext);
+    const [isOpen, setIsOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const MySwal = withReactContent(Swal);
 
-    useEffect(() => {}, []);
+    useEffect(() => {
+        getCurrentNotifications();
+    }, []);
+
+    const getCurrentNotifications = async () => {
+        var response = await getNotifications(currentUser.id_user);
+        if (response.error == true) {
+            console.log("----------------- Notifications Error -----------------");
+            console.log("There was an error while waiting for notifications!");
+            console.log("BE Message: " + response.message);
+            console.log("----------------- End of error log -----------------");
+            if (response.errorCode == 1) {
+                logout();
+            }
+        } else {
+            setNotifications(response.data);
+        }
+    };
+
+    const setVisiblityOfNotifications = async () => {
+        var response = await setNotificationsSeen(currentUser.id_user);
+        if (response.error == true) {
+            console.log("----------------- Notifications Error -----------------");
+            console.log("There was an error while setting the updates for notifications!");
+            console.log("BE Message: " + response.message);
+            console.log("----------------- End of error log -----------------");
+            if (response.errorCode == 1) {
+                logout();
+            }
+        }
+    };
+
+    const countNumberOfVisibleNotifications = () => {
+        const visibleNotificationsCount = notifications.filter(
+            (notification) => notification.notifications_visibility === 1
+        ).length;
+        return visibleNotificationsCount;
+    };
+
+    const handleModalOpen = async () => {
+        await setVisiblityOfNotifications();
+        await getCurrentNotifications();
+        setIsOpen(true);
+    };
+
+    const handleNotificationDelete = async (id_notification) => {
+        var response = await deleteNotification(id_notification);
+        setIsOpen(false);
+        if (response.error == false) {
+            MySwal.fire({
+                title: <strong>Notifications deleted</strong>,
+                html: "<i>Your notification has been deleted successfully!</i>",
+                icon: "success",
+            }).then(async () => {
+                await getCurrentNotifications();
+            });
+        } else if (response.error == true) {
+            MySwal.fire({
+                title: <strong>{response.message}</strong>,
+                html: "",
+                icon: "error",
+            }).then(() => {
+                if (response.errorCode == 1) {
+                    logout();
+                }
+            });
+        }
+    };
 
     return (
         <nav className="bg-white dark:bg-gray-900 w-full z-20 top-0 left-0 border-b border-gray-200 dark:border-gray-600">
@@ -18,6 +99,14 @@ const Navbar = () => {
                         Wishy
                     </span>
                 </a>
+                <NotificationsModal
+                    handleOpen={isOpen}
+                    handleClose={() => {
+                        setIsOpen(false);
+                    }}
+                    handleDelete={handleNotificationDelete}
+                    notifications={notifications}
+                />
                 <div className="flex items-center md:order-2">
                     <button
                         type="button"
@@ -30,6 +119,21 @@ const Navbar = () => {
                         <span className="sr-only">Open user menu</span>
                         <img className="w-8 h-8 rounded-full" src={noAvatar} alt="user photo" />
                     </button>
+                    <div className="relative ml-2">
+                        <button
+                            onClick={handleModalOpen}
+                            className="bg-red-500 border border-red-300 rounded-full w-8 h-8 flex items-center justify-center text-white"
+                        >
+                            <span className="text-sm font-semibold">
+                                <FontAwesomeIcon icon={faBell} style={{ fontSize: "18px" }} />
+                            </span>
+                        </button>
+                        {countNumberOfVisibleNotifications() > 0 && (
+                            <div className="absolute -top-1 -right-1 bg-yellow-400 w-4 h-4 rounded-full border border-red-400 font-bold text-red-500 flex items-center justify-center">
+                                {countNumberOfVisibleNotifications()}
+                            </div>
+                        )}
+                    </div>
                     <div
                         className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600"
                         id="user-dropdown"

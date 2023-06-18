@@ -82,6 +82,15 @@ export const getGroupMembers = async (id_group) => {
     }
 };
 
+export const getGroupsForList = async (id_wishlist) => {
+    try {
+        var results = await axios.get("/group/groupsOfList/" + id_wishlist);
+        return results.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
 export const sendEmailToGroupMembers = async (emailContent, id_group, group_name) => {
     try {
         var results = await axios.post("/group/sendGroupEmail/", { emailContent, id_group, group_name });
