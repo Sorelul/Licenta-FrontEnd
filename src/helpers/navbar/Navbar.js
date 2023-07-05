@@ -20,6 +20,8 @@ const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const MySwal = withReactContent(Swal);
+    const currentPath = window.location.pathname;
+    const lastSegment = currentPath.substring(currentPath.lastIndexOf("/") + 1);
 
     useEffect(() => {
         getCurrentNotifications();
@@ -91,7 +93,9 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="bg-white dark:bg-gray-900 w-full z-20 top-0 left-0 border-b border-gray-200 dark:border-gray-600">
+        <nav
+            className={`bg-white dark:bg-gray-900 w-full z-20 top-0 left-0 border-b border-gray-200 dark:border-gray-600 h-[65px] `}
+        >
             <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
                 <a href="/home" className="flex items-center">
                     <img src={logo} className="h-8 mr-3" alt="Wishy Logo" />
@@ -208,7 +212,7 @@ const Navbar = () => {
                         </li>
                         <li>
                             <a
-                                href="#"
+                                href="/shop"
                                 className="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
                             >
                                 Shop For

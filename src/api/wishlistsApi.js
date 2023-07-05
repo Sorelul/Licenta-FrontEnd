@@ -35,3 +35,12 @@ export const deleteList = async (id_wishlist) => {
         console.log(error);
     }
 };
+
+export const getWishlistsForUserFromGroup = async (user_id, group_id) => {
+    try {
+        var results = await axios.get("/wishlist/alllistsofmemberfromgroup/" + user_id + "/" + group_id);
+        return results.data;
+    } catch (error) {
+        console.log(error);
+    }
+};

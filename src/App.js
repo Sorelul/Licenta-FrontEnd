@@ -18,6 +18,8 @@ import AddGroup from "./pages/groups/components/AddGroup";
 import JoinGroup from "./pages/groups/components/JoinGroup";
 import GroupsList from "./pages/groups/components/GroupsList";
 import Error404 from "./helpers/404/Error404";
+import ShopHome from "./pages/shop_for/ShopHome";
+import ColumnShop from "./helpers/column_shop/ColumnShop";
 // -- End Pages --
 
 function App() {
@@ -171,6 +173,25 @@ function App() {
                                 <Layout display="groups">
                                     <GroupsList />
                                 </Layout>
+                            </>
+                        ) : (
+                            <Navigate to="/login" replace={true} />
+                        )
+                    }
+                />
+
+                {/* ---------- Shop For ---------- */}
+
+                <Route
+                    path="/shop"
+                    element={
+                        currentUser ? (
+                            <>
+                                <Navbar />
+
+                                <ShopHome />
+
+                                <Footer />
                             </>
                         ) : (
                             <Navigate to="/login" replace={true} />

@@ -8,92 +8,86 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const {login} = useContext(AuthContext);
-  const MySwal = withReactContent(Swal);
+    const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const { login } = useContext(AuthContext);
+    const MySwal = withReactContent(Swal);
 
-  const switchPasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+    const switchPasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try{
-      await login({email, password});
-      window.location.href="/list"
-    }catch(e){
-      console.log(e);
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            await login({ email, password });
+            window.location.href = "/list";
+        } catch (e) {
+            console.log(e);
 
-      MySwal.fire({
-        title: <strong>There was a problem</strong>,
-        html: <i>{e.response.data}</i>,
-        icon: "error",
-      })
-    }
-  };
+            MySwal.fire({
+                title: <strong>There was a problem</strong>,
+                html: <i>{e.response.data}</i>,
+                icon: "error",
+            });
+        }
+    };
 
+    return (
+        <div className="flex w-full h-screen">
+            <div className="w-full flex items-center justify-center lg:w-1/2">
+                <div className=" w-11/12 max-w-[700px] px-10 py-20 rounded-3xl bg-white border-2 border-gray-100">
+                    <h1 className="text-5xl font-semibold">Welcome to Wishy</h1>
+                    <p className="font-medium text-lg text-gray-500 mt-4">Welcome back! Please enter you details.</p>
 
+                    <div className="mt-8">
+                        <div className="flex flex-col">
+                            <label className="text-lg font-medium">Email</label>
+                            <input
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent"
+                                placeholder="Enter your email"
+                            />
+                        </div>
+                        <div className="flex flex-col mt-4">
+                            <label className="text-lg font-medium inline-block">
+                                Password
+                                <FontAwesomeIcon
+                                    className="ml-4"
+                                    onClick={switchPasswordVisibility}
+                                    style={{ cursor: "pointer" }}
+                                    icon={showPassword ? faEye : faEyeSlash}
+                                />
+                            </label>
 
-  return (
-    <div className="flex w-full h-screen">
-      <div className="w-full flex items-center justify-center lg:w-1/2">
-        <div className=" w-11/12 max-w-[700px] px-10 py-20 rounded-3xl bg-white border-2 border-gray-100">
-          <h1 className="text-5xl font-semibold">Welcome to Wishy</h1>
-          <p className="font-medium text-lg text-gray-500 mt-4">
-            Welcome back! Please enter you details.
-          </p>
-
-          <div className="mt-8">
-            <div className="flex flex-col">
-              <label className="text-lg font-medium">Email</label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent"
-                placeholder="Enter your email"
-              />
-            </div>
-            <div className="flex flex-col mt-4">
-              <label className="text-lg font-medium inline-block">
-                Password
-                <FontAwesomeIcon
-                  className="ml-4"
-                  onClick={switchPasswordVisibility}
-                  style={{ cursor: "pointer" }}
-                  icon={showPassword ? faEye : faEyeSlash}
-                />
-              </label>
-
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent"
-                placeholder="Enter your email"
-                type={showPassword ? "text" : "password"}
-              />
-            </div>
-            <div className="mt-8 flex justify-between items-center">
-              <div>
-                <input type="checkbox" id="remember" />
-                <label className="ml-2 font-medium text-base" htmlFor="remember">
-                  Remember for 30 days
-                </label>
-              </div>
-              <button className="font-medium text-base text-violet-500">
-                Forgot password
-              </button>
-            </div>
-            <div className="mt-8 flex flex-col gap-y-4">
-              <button
-                onClick={handleLogin}
-                className="active:scale-[.98] active:duration-75 transition-all hover:scale-[1.01]  ease-in-out transform py-4 bg-violet-500 rounded-xl text-white font-bold text-lg"
-              >
-                Sign in
-              </button>
-              <button className="flex items-center justify-center gap-2 active:scale-[.98] active:duration-75 transition-all hover:scale-[1.01]  ease-in-out transform py-4  rounded-xl text-gray-700 font-semibold text-lg border-2 border-gray-100 ">
+                            <input
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent"
+                                placeholder="Enter your email"
+                                type={showPassword ? "text" : "password"}
+                            />
+                        </div>
+                        <div className="mt-8 flex justify-between items-center">
+                            <div>
+                                <input type="checkbox" id="remember" />
+                                <label className="ml-2 font-medium text-base" htmlFor="remember">
+                                    Remember for 30 days
+                                </label>
+                            </div>
+                            <button className="font-medium text-base text-violet-500">Forgot password</button>
+                        </div>
+                        <div className="mt-8 flex flex-col gap-y-4">
+                            <button
+                                onClick={handleLogin}
+                                className="active:scale-[.98] active:duration-75 transition-all hover:scale-[1.01]  ease-in-out transform py-4 bg-violet-500 rounded-xl text-white font-bold text-lg"
+                            >
+                                Sign in
+                            </button>
+                            {/* <button className="flex items-center justify-center gap-2 active:scale-[.98] active:duration-75 transition-all hover:scale-[1.01]  ease-in-out transform py-4  rounded-xl text-gray-700 font-semibold text-lg border-2 border-gray-100 ">
                 <svg
                   width="24"
                   height="24"
@@ -119,26 +113,26 @@ const Login = () => {
                   />
                 </svg>
                 Sign in with Google
-              </button>
+              </button> */}
+                        </div>
+                        <div className="mt-8 flex justify-center items-center">
+                            <p className="font-medium text-base">Don't have an account?</p>
+                            <button
+                                onClick={() => navigate("/register")}
+                                className="ml-2 font-medium text-base text-violet-500"
+                            >
+                                Sign up
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className="mt-8 flex justify-center items-center">
-              <p className="font-medium text-base">Don't have an account?</p>
-              <button
-                onClick={() => navigate("/register")}
-                className="ml-2 font-medium text-base text-violet-500"
-              >
-                Sign up
-              </button>
+            <div className="hidden relative w-1/2 h-full lg:flex items-center justify-center bg-gray-200">
+                <div className="w-60 h-60 rounded-full bg-gradient-to-tr from-violet-500 to-pink-500 animate-spin" />
+                <div className="w-full h-1/2 absolute bottom-0 bg-white/10 backdrop-blur-lg" />
             </div>
-          </div>
         </div>
-      </div>
-      <div className="hidden relative w-1/2 h-full lg:flex items-center justify-center bg-gray-200">
-        <div className="w-60 h-60 rounded-full bg-gradient-to-tr from-violet-500 to-pink-500 animate-spin" />
-        <div className="w-full h-1/2 absolute bottom-0 bg-white/10 backdrop-blur-lg" />
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Login;
