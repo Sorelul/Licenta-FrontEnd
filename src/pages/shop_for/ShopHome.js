@@ -7,6 +7,7 @@ import withReactContent from "sweetalert2-react-content";
 import noAvatar from "../../assets/noAvatar.jpg";
 import { getWishlistsForUserFromGroup } from "../../api/wishlistsApi";
 import MembersListsModal from "../../helpers/modal/MembersListsModal";
+import MembersListDetailsModal from "../../helpers/modal/MembersListDetailsModal";
 
 const ShopHome = () => {
     const { groups, getGroupsInfo, logout } = useContext(AuthContext);
@@ -14,9 +15,18 @@ const ShopHome = () => {
     const [groupMembers, setGroupMembers] = useState([]);
     const [selectedUser, setSelectedUser] = useState();
     const [membersLists, setMembersLists] = useState([]);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const MySwal = withReactContent(Swal);
+
+    // Second modal
+    const [isListModalOpen, setListModalOpen] = useState(false);
+    const [listSelected, setListSelected] = useState();
+
+    const openList = (id_wishlist) => {
+        setListSelected(id_wishlist);
+        setIsModalOpen(false);
+        setListModalOpen(true);
+    };
 
     useEffect(() => {
         getGroupsInfo();
@@ -113,6 +123,13 @@ const ShopHome = () => {
                 handleClose={() => setIsModalOpen(!isModalOpen)}
                 user={selectedUser}
                 lists={membersLists}
+                openList={openList}
+            />
+
+            <MembersListDetailsModal
+                handleOpen={isListModalOpen}
+                handleClose={() => setListModalOpen(!isListModalOpen)}
+                id_list={listSelected}
             />
             <div class="grid gap-8 lg:gap-16 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {groupMembers.length !== 0 ? (
