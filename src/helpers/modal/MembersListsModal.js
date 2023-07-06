@@ -15,7 +15,7 @@ const MembersListsModal = ({ handleOpen, handleClose, user, lists, openList }) =
             <div className="bg-white rounded-md p-6 w-1/4 overflow-auto max-h-96">
                 <DialogTitle className="text-lg font-semibold">{user + " Lists"}</DialogTitle>
                 <DialogContent>
-                    <div class="space-y-4">
+                    <div className="space-y-4">
                         {lists.length > 0 ? (
                             lists.map((list, key) => (
                                 <button
@@ -23,9 +23,9 @@ const MembersListsModal = ({ handleOpen, handleClose, user, lists, openList }) =
                                     onClick={() => {
                                         openList(list.id_wishlist);
                                     }}
-                                    class="relative w-full inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800"
+                                    className="relative w-full inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800"
                                 >
-                                    <span class="relative px-5 w-full py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                                    <span className="relative px-5 w-full py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
                                         {list.wishlists_name}
                                     </span>
                                 </button>

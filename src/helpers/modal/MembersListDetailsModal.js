@@ -70,7 +70,10 @@ const MembersListDetailsModal = ({ handleOpen, handleClose, id_list }) => {
                     <div className="space-y-4">
                         {items ? (
                             items.map((item, key) => (
-                                <div className="w-full border shadow-sm bg-gray-800 text-white flex p-2 pl-5 pr-5 rounded-full">
+                                <div
+                                    key={key}
+                                    className="w-full border shadow-sm bg-gray-800 text-white flex p-2 pl-5 pr-5 rounded-full"
+                                >
                                     <div className="w-1/6"> {item?.items_name ? item?.items_name : "Dummy list"}</div>
                                     <div className="flex justify-around w-5/6">
                                         <div> Rank: {item?.items_ranking ? item?.items_ranking : "No Ranking"}</div>
