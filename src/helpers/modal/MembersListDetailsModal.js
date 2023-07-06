@@ -67,7 +67,7 @@ const MembersListDetailsModal = ({ handleOpen, handleClose, id_list }) => {
             <div className="bg-white rounded-md p-6 w-1/2 overflow-auto max-h-96">
                 <DialogTitle className="text-lg font-semibold">{currentList?.wishlists_name}</DialogTitle>
                 <DialogContent>
-                    <div class="space-y-4">
+                    <div className="space-y-4">
                         {items ? (
                             items.map((item, key) => (
                                 <div className="w-full border shadow-sm bg-gray-800 text-white flex p-2 pl-5 pr-5 rounded-full">
